@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unban Impluse X Suki</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ============ LOADING SCREEN ============ */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #0a0a0a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff6b35;
+            margin-bottom: 30px;
+            animation: logoPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 107, 53, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(255, 107, 53, 0.7); }
+        }
+
+        .loading-title {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff6b35, #ff8c42, #ffa559, #ff6b35);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .loading-subtitle {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 40px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* Saweria-style loading bar */
+        .loading-bar-container {
+            width: 300px;
+            max-width: 80%;
+            height: 6px;
+            background: #1e1e2e;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff6b35, #ff8c42, #ffb347);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .loading-percent {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ff8c42;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 25px;
+        }
+
+        .loading-dots span {
+            width: 10px;
+            height: 10px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: dotBounce 1.4s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+
+        .loading-tips {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+            max-width: 280px;
+            line-height: 1.6;
+            animation: fadeInOut 4s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* ============ MAIN APP ============ */
+        .main-app {
+            display: none;
+            min-height: 100vh;
+            background: #0a0a0a;
+        }
+
+        .main-app.show {
+            display: block;
+            animation: fadeInApp 0.8s ease;
+        }
+
+        @keyframes fadeInApp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 107, 53, 0.3);
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            padding: 30px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+            background: linear-gradient(180deg, rgba(255, 107, 53, 0.05) 0%, transparent 100%);
+        }
+
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ff6b35;
+            margin-bottom: 15px;
+            box-shadow: 0 0 25px rgba(255, 107, 53, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff6b35, #ffb347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header .status-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 14px;
+            background: rgba(0, 255, 100, 0.1);
+            border: 1px solid rgba(0, 255, 100, 0.3);
+            border-radius: 20px;
+            font-size: 11px;
+            color: #00ff64;
+            animation: statusPulse 2s infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 100, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 100, 0.4); }
+        }
+
+        /* Content container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 25px 20px 40px;
+        }
+
+        /* Menu buttons */
+        .menu-section {
+            margin-bottom: 30px;
+        }
+
+        .menu-section h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        .menu-grid {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .menu-btn {
+            flex: 1;
+            min-width: 100px;
+            max-width: 160px;
+            padding: 18px 15px;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            background: #141420;
+            color: #ccc;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .menu-btn:hover::before {
+            left: 100%;
+        }
+
+        .menu-btn .btn-icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .menu-btn .btn-label {
+            font-size: 12px;
+            display: block;
+            color: #888;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .menu-btn.spam-btn {
+            border-color: rgba(255, 193, 7, 0.3);
+            background: linear-gradient(135deg, #141420, rgba(255, 193, 7, 0.05));
+        }
+        .menu-btn.spam-btn:hover, .menu-btn.spam-btn.active {
+            border-color: #ffc107;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
+            color: #ffc107;
+            box-shadow: 0 5px 25px rgba(255, 193, 7, 0.2);
+        }
+
+        .menu-btn.perm-btn {
+            border-color: rgba(255, 53, 53, 0.3);
+            background: linear-gradient(135deg, #141420, rgba(255, 53, 53, 0.05));
+        }
+        .menu-btn.perm-btn:hover, .menu-btn.perm-btn.active {
+            border-color: #ff3535;
+            background: linear-gradient(135deg, rgba(255, 53, 53, 0.15), rgba(255, 53, 53, 0.05));
+            color: #ff3535;
+            box-shadow: 0 5px 25px rgba(255, 53, 53, 0.2);
+        }
+
+        .menu-btn.unban-btn {
+            border-color: rgba(0, 255, 100, 0.3);
+            background: linear-gradient(135deg, #141420, rgba(0, 255, 100, 0.05));
+        }
+        .menu-btn.unban-btn:hover, .menu-btn.unban-btn.active {
+            border-color: #00ff64;
+            background: linear-gradient(135deg, rgba(0, 255, 100, 0.15), rgba(0, 255, 100, 0.05));
+            color: #00ff64;
+            box-shadow: 0 5px 25px rgba(0, 255, 100, 0.2);
+        }
+
+        /* Form area */
+        .form-section {
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        .form-section.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .preview-card {
+            background: #141420;
+            border: 1px solid rgba(255, 107, 53, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b35, #ffb347, #ff6b35);
+            background-size: 200% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        .preview-label {
+            font-size: 11px;
+            color: #ff8c42;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .preview-text {
+            font-size: 13px;
+            color: #bbb;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .preview-text .highlight {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        /* Input area */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #aaa;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .phone-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #141420;
+            border: 2px solid #2a2a3e;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+        }
+
+        .phone-input-wrapper:focus-within {
+            border-color: #ff6b35;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.15);
+        }
+
+        .phone-prefix {
+            padding: 16px 15px;
+            background: rgba(255, 107, 53, 0.1);
+            color: #ff8c42;
+            font-weight: 700;
+            font-size: 15px;
+            border-right: 1px solid #2a2a3e;
+            user-select: none;
+        }
+
+        .phone-input {
+            flex: 1;
+            padding: 16px 15px;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .phone-input::placeholder {
+            color: #444;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: #fff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn .emoji {
+            font-style: normal;
+        }
+
+        /* Info box */
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 107, 53, 0.05);
+            border: 1px solid rgba(255, 107, 53, 0.1);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .info-box p {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .info-box .email-highlight {
+            color: #ff8c42;
+            font-weight: 600;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e1e2e;
+            border: 1px solid #ff6b35;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 10000;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 10px 40px rgba(255, 107, 53, 0.3);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 25px 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer p {
+            font-size: 11px;
+            color: #444;
+        }
+
+        .footer .heart {
+            color: #ff3535;
+            animation: heartBeat 1.5s infinite;
+            display: inline-block;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .menu-btn {
+                min-width: 85px;
+                padding: 14px 10px;
+            }
+            .menu-btn .btn-icon {
+                font-size: 24px;
+            }
+            .loading-title {
+                font-size: 22px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+
+        /* Selection color */
+        ::selection {
+            background: rgba(255, 107, 53, 0.3);
+            color: #fff;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff6b35;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============ LOADING SCREEN ============ -->
+    <div class="loading-screen" id="loadingScreen">
+        <img src="https://cdn.phototourl.com/free/2026-07-22-fb5d9d8e-b7ba-411f-a956-de13a8ad0a47.jpg" alt="Logo" class="loading-logo" onerror="this.style.display='none'">
+        <div class="loading-title">Unban Impluse X Suki</div>
+        <div class="loading-subtitle">WhatsApp Recovery Tool</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+        <div class="loading-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="loading-tips" id="loadingTips">Mempersiapkan sistem...</div>
+    </div>
+
+    <!-- ============ MAIN APP ============ -->
+    <div class="main-app" id="mainApp">
+
+        <!-- Background Particles -->
+        <div class="particles" id="particles"></div>
+
+        <!-- Header -->
+        <div class="header">
+            <img src="https://cdn.phototourl.com/free/2026-07-22-fb5d9d8e-b7ba-411f-a956-de13a8ad0a47.jpg" alt="Logo" class="header-logo" onerror="this.style.background='linear-gradient(135deg,#ff6b35,#ff8c42)'; this.style.display='block';">
+            <h1>Unban Impluse X Suki</h1>
+            <p>WhatsApp Unban Tool</p>
+            <div class="status-badge">● System Online</div>
+        </div>
+
+        <!-- Content -->
+        <div class="container">
+
+            <!-- Menu Selection -->
+            <div class="menu-section">
+                <h2>Pilih Jenis Unban</h2>
+                <div class="menu-grid">
+                    <button class="menu-btn unban-btn" onclick="selectMenu('unban')">
+                        <span class="btn-icon">🔓</span>
+                        Unban
+                        <span class="btn-label">Standard</span>
+                    </button>
+                    <button class="menu-btn spam-btn" onclick="selectMenu('spam')">
+                        <span class="btn-icon">⚠️</span>
+                        Spam
+                        <span class="btn-label">Report Spam</span>
+                    </button>
+                    <button class="menu-btn perm-btn" onclick="selectMenu('permanen')">
+                        <span class="btn-icon">🚫</span>
+                        Permanen
+                        <span class="btn-label">Permanent Ban</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="form-section" id="formSection">
+
+                <!-- Preview Card -->
+                <div class="preview-card">
+                    <div class="preview-label" id="previewLabel">📧 Preview Pesan</div>
+                    <div class="preview-text" id="previewText"></div>
+                </div>
+
+                <!-- Phone Input -->
+                <div class="input-group">
+                    <label>📱 Masukkan Nomor WhatsApp</label>
+                    <div class="phone-input-wrapper">
+                        <div class="phone-prefix">+62</div>
+                        <input type="tel" class="phone-input" id="phoneInput" placeholder="8xxxxxxxxxx" maxlength="13" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button class="submit-btn" onclick="sendUnban()">
+                    Unban WA 🥵
+                </button>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <p>Pesan akan dikirim ke email resmi WhatsApp<br><span class="email-highlight">smb@support.whatsapp.com</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Made with <span class="heart">❤</span> by Impluse X Suki</p>
+            <p style="margin-top:5px; font-size:10px; color:#333;">© 2025 All Rights Reserved</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============ LOADING SCREEN ============
+        const tips = [
+            "Mempersiapkan sistem...",
+            "Menghubungkan ke server...",
+            "Memuat modul unban...",
+            "Mengkonfigurasi protokol...",
+            "Menyiapkan enkripsi...",
+            "Mengecek koneksi WhatsApp...",
+            "Memverifikasi sistem...",
+            "Hampir selesai..."
+        ];
+
+        let loadProgress = 0;
+        let tipIndex = 0;
+
+        function startLoading() {
+            const bar = document.getElementById('loadingBar');
+            const percent = document.getElementById('loadingPercent');
+            const tipsEl = document.getElementById('loadingTips');
+
+            const interval = setInterval(() => {
+                // Random increment between 1-5
+                loadProgress += Math.random() * 4 + 1;
+
+                if (loadProgress >= 100) {
+                    loadProgress = 100;
+                    clearInterval(interval);
+
+                    bar.style.width = '100%';
+                    percent.textContent = '100%';
+                    tipsEl.textContent = 'Selesai! Membuka aplikasi...';
+
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').classList.add('hidden');
+                        document.getElementById('mainApp').classList.add('show');
+                        createParticles();
+                    }, 800);
+
+                    return;
+                }
+
+                bar.style.width = loadProgress + '%';
+                percent.textContent = Math.floor(loadProgress) + '%';
+
+                // Update tips
+                const newTipIndex = Math.floor(loadProgress / (100 / tips.length));
+                if (newTipIndex !== tipIndex && newTipIndex < tips.length) {
+                    tipIndex = newTipIndex;
+                    tipsEl.textContent = tips[tipIndex];
+                }
+            }, 120);
+        }
+
+        // Start loading on page load
+        window.addEventListener('load', () => {
+            setTimeout(startLoading, 500);
+        });
+
+        // ============ PARTICLES ============
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = (Math.random() * 10) + 's';
+                particle.style.width = (Math.random() * 3 + 1) + 'px';
+                particle.style.height = particle.style.width;
+                container.appendChild(particle);
+            }
+        }
+
+        // ============ MENU SELECTION ============
+        let selectedType = '';
+
+        const messages = {
+            spam: `Kepada yth pihak WhatsApp.
+
+Saya tidak melakukan spam ataupun apapun itu.
+WhatsApp saya telah di hack, untuk pihak Mark Zuckerberg dan WhatsApp semoga membuka tinjauan yang terjadi pada saya.
+
+Nomor saya: [+62{NOMOR}]
+
+Terimakasih.`,
+
+            permanen: `Halo! Tim WhatsApp,
+
+Akun WhatsApp saya telah Diblokir. Maaf, saya punya menginstal aplikasi Pihak Ketiga karena kesalahan. Silahkan buka blokir akun saya segera.
+
+Ini nomor saya: [+62{NOMOR}]
+
+Terimakasih.`,
+
+            unban: `Kepada yth pihak WhatsApp.
+
+Saya ingin mengajukan peninjauan atas pemblokiran akun WhatsApp saya. Saya merasa tidak melanggar ketentuan layanan WhatsApp. Mohon untuk segera membuka blokir akun saya.
+
+Nomor saya: [+62{NOMOR}]
+
+Terimakasih atas perhatiannya.`
+        };
+
+        function selectMenu(type) {
+            selectedType = type;
+
+            // Update active button
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (type === 'spam') {
+                document.querySelector('.spam-btn').classList.add('active');
+            } else if (type === 'permanen') {
+                document.querySelector('.perm-btn').classList.add('active');
+            } else {
+                document.querySelector('.unban-btn').classList.add('active');
+            }
+
+            // Show form
+            const formSection = document.getElementById('formSection');
+            formSection.classList.remove('show');
+            
+            setTimeout(() => {
+                formSection.classList.add('show');
+                updatePreview();
+            }, 100);
+
+            // Update preview label
+            const labels = {
+                spam: '⚠️ Preview - Unban Spam',
+                permanen: '🚫 Preview - Unban Permanen',
+                unban: '🔓 Preview - Unban Standard'
+            };
+            document.getElementById('previewLabel').textContent = labels[type];
+        }
+
+        function updatePreview() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            const displayPhone = phone || 'xxxx';
+            
+            if (selectedType && messages[selectedType]) {
+                let msg = messages[selectedType].replace('{NOMOR}', displayPhone);
+                
+                // Add highlight to phone number
+                const previewEl = document.getElementById('previewText');
+                previewEl.innerHTML = msg.replace(
+                    /\[\+62[^\]]*\]/g, 
+                    match => `<span class="highlight">${match}</span>`
+                );
+            }
+        }
+
+        // ============ SEND UNBAN ============
+        function sendUnban() {
+            const phone = document.getElementById('phoneInput').value.trim();
+
+            if (!phone) {
+                showToast('⚠️ Masukkan nomor WhatsApp terlebih dahulu!');
+                document.getElementById('phoneInput').focus();
+                return;
+            }
+
+            if (phone.length < 8) {
+                showToast('⚠️ Nomor terlalu pendek!');
+                return;
+            }
+
+            if (!selectedType) {
+                showToast('⚠️ Pilih jenis unban terlebih dahulu!');
+                return;
+            }
+
+            // Build email
+            const email = 'smb@support.whatsapp.com';
+            const subjects = {
+                spam: 'Permohonan Unban Akun WhatsApp - Laporan Spam',
+                permanen: 'Permohonan Unban Akun WhatsApp - Blokir Permanen',
+                unban: 'Permohonan Unban Akun WhatsApp'
+            };
+
+            const subject = encodeURIComponent(subjects[selectedType]);
+            const body = encodeURIComponent(messages[selectedType].replace('{NOMOR}', phone));
+
+            const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+
+            showToast('✅ Membuka email untuk mengirim ke WhatsApp...');
+
+            setTimeout(() => {
+                window.location.href = mailtoLink;
+            }, 1000);
+        }
+
+        // ============ TOAST ============
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
