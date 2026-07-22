@@ -5,1405 +5,1296 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Unban Impluse X Suki</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
         :root {
-            --bg-primary: #050508;
-            --bg-secondary: #0a0a10;
-            --bg-card: #0d0d15;
-            --bg-card-hover: #111120;
-            --red-primary: #dc2626;
+            --bg-void: #020204;
+            --bg-deep: #06060c;
+            --bg-card: #0a0a14;
+            --bg-card2: #0e0e1a;
+            --bg-hover: #121222;
+            --red: #dc2626;
             --red-glow: #ef4444;
             --red-dark: #991b1b;
             --red-deep: #7f1d1d;
-            --accent: #ff2d2d;
-            --accent-soft: #ff4444;
-            --text-primary: #e8e8e8;
-            --text-secondary: #888;
-            --text-muted: #555;
-            --border-color: rgba(220, 38, 38, 0.12);
-            --border-hover: rgba(220, 38, 38, 0.35);
+            --crimson: #b91c1c;
+            --blood: #450a0a;
+            --white: #f0f0f0;
+            --gray: #888;
+            --gray-dark: #555;
+            --gray-darker: #333;
+            --border: rgba(220,38,38,0.1);
+            --border-h: rgba(220,38,38,0.3);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: 'Space Grotesk', 'Poppins', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-void);
+            color: var(--white);
             min-height: 100vh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        ::selection {
-            background: rgba(220, 38, 38, 0.3);
-            color: #fff;
+        ::selection { background: rgba(220,38,38,0.3); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-void); }
+        ::-webkit-scrollbar-thumb { background: var(--red-dark); border-radius: 4px; }
+
+        /* ===================== LOADING ===================== */
+        #loadScreen {
+            position: fixed; inset: 0;
+            background: var(--bg-void);
+            z-index: 99999;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: opacity 1s, visibility 1s;
         }
+        #loadScreen.bye { opacity:0; visibility:hidden; pointer-events:none; }
 
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: var(--bg-primary); }
-        ::-webkit-scrollbar-thumb { background: var(--red-dark); border-radius: 5px; }
-
-        /* ==================== LOADING SCREEN ==================== */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            transition: opacity 1s ease, visibility 1s ease;
+        .ld-blackhole {
+            position: absolute; inset: 0; overflow: hidden;
         }
-
-        .loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+        .ld-blackhole::before {
+            content:''; position:absolute;
+            top:50%; left:50%; width:700px; height:700px;
+            transform: translate(-50%,-50%);
+            background: radial-gradient(circle, rgba(220,38,38,0.06) 0%, rgba(127,29,29,0.03) 30%, transparent 65%);
+            animation: bhPulse 5s ease-in-out infinite;
         }
-
-        .loading-bg-effect {
-            position: absolute;
-            inset: 0;
-            overflow: hidden;
-        }
-
-        .loading-bg-effect::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 600px;
-            height: 600px;
-            transform: translate(-50%, -50%);
-            background: radial-gradient(circle, rgba(220,38,38,0.08) 0%, transparent 70%);
-            animation: blackholePulse 4s ease-in-out infinite;
-        }
-
-        @keyframes blackholePulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
-        }
-
-        .loading-ring {
-            width: 100px;
-            height: 100px;
-            position: relative;
-            margin-bottom: 40px;
-        }
-
-        .loading-ring .ring {
-            position: absolute;
-            inset: 0;
+        .ld-blackhole::after {
+            content:''; position:absolute;
+            top:50%; left:50%; width:400px; height:400px;
+            transform: translate(-50%,-50%);
             border-radius: 50%;
-            border: 2px solid transparent;
+            border: 1px solid rgba(220,38,38,0.04);
+            animation: bhRing 8s linear infinite;
+        }
+        @keyframes bhPulse {
+            0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.4;}
+            50%{transform:translate(-50%,-50%) scale(1.4);opacity:1;}
+        }
+        @keyframes bhRing { to{transform:translate(-50%,-50%) rotate(360deg);} }
+
+        .ld-orb-field { position: absolute; inset: 0; overflow: hidden; }
+        .ld-orb {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle, rgba(220,38,38,0.15), transparent 70%);
+            animation: orbFloat linear infinite;
+        }
+        @keyframes orbFloat {
+            0%{transform:translateY(0) scale(1);opacity:0;}
+            20%{opacity:1;}
+            80%{opacity:1;}
+            100%{transform:translateY(-100vh) scale(0.3);opacity:0;}
         }
 
-        .loading-ring .ring:nth-child(1) {
-            border-top-color: var(--red-primary);
-            animation: ringRotate 1.2s linear infinite;
-        }
-
-        .loading-ring .ring:nth-child(2) {
-            inset: 8px;
-            border-right-color: var(--red-glow);
-            animation: ringRotate 1.8s linear infinite reverse;
-        }
-
-        .loading-ring .ring:nth-child(3) {
-            inset: 16px;
-            border-bottom-color: var(--accent);
-            animation: ringRotate 2.4s linear infinite;
-        }
-
-        .loading-ring .ring-core {
-            position: absolute;
-            inset: 24px;
-            background: radial-gradient(circle, var(--red-dark), var(--bg-primary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .loading-ring .ring-core img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        @keyframes ringRotate {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-brand {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .loading-brand span {
-            color: var(--red-primary);
-        }
-
-        .loading-tagline {
-            font-size: 11px;
-            color: var(--text-muted);
-            letter-spacing: 4px;
-            text-transform: uppercase;
+        .ld-rings {
+            position: relative; width: 120px; height: 120px;
             margin-bottom: 35px;
         }
-
-        .loading-progress-wrap {
-            width: 280px;
-            max-width: 80%;
-        }
-
-        .loading-progress-bar {
-            width: 100%;
-            height: 3px;
-            background: rgba(220,38,38,0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loading-progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--red-dark), var(--red-primary), var(--red-glow));
-            border-radius: 10px;
-            transition: width 0.2s ease;
-            position: relative;
-        }
-
-        .loading-progress-fill::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: -2px;
-            width: 7px;
-            height: 7px;
-            background: var(--red-glow);
+        .ld-rings .rg {
+            position: absolute; inset: 0;
             border-radius: 50%;
-            box-shadow: 0 0 12px var(--red-glow);
+            border: 1.5px solid transparent;
+        }
+        .ld-rings .rg:nth-child(1){border-top-color:var(--red);animation:rSpin 1s linear infinite;}
+        .ld-rings .rg:nth-child(2){inset:10px;border-right-color:var(--red-glow);animation:rSpin 1.6s linear infinite reverse;}
+        .ld-rings .rg:nth-child(3){inset:20px;border-bottom-color:var(--crimson);animation:rSpin 2.2s linear infinite;}
+        .ld-rings .rg:nth-child(4){inset:30px;border-left-color:var(--red-dark);animation:rSpin 2.8s linear infinite reverse;}
+        @keyframes rSpin { to{transform:rotate(360deg);} }
+        .ld-rings .rg-core {
+            position:absolute; inset:38px;
+            background: radial-gradient(circle, var(--red-deep), var(--bg-void));
+            border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow: 0 0 30px rgba(220,38,38,0.2);
+        }
+        .ld-rings .rg-core img {
+            width:30px; height:30px; border-radius:50%; object-fit:cover;
         }
 
-        .loading-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
+        .ld-brand {
+            font-family:'Orbitron',sans-serif;
+            font-size:20px; font-weight:800;
+            letter-spacing: 2px;
+            margin-bottom:4px;
+            position:relative; z-index:1;
+        }
+        .ld-brand span { color:var(--red); }
+        .ld-ver {
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:var(--gray-dark);
+            letter-spacing:4px; text-transform:uppercase;
+            margin-bottom:30px;
         }
 
-        .loading-stats span {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: var(--text-muted);
+        .ld-bar-wrap {
+            width:260px; max-width:80%;
+            position:relative; z-index:1;
         }
+        .ld-bar {
+            width:100%; height:2px;
+            background:rgba(220,38,38,0.08);
+            border-radius:10px; overflow:hidden;
+        }
+        .ld-bar-fill {
+            height:100%; width:0%;
+            background: linear-gradient(90deg, var(--blood), var(--red), var(--red-glow));
+            border-radius:10px;
+            transition: width 0.15s ease;
+            position:relative;
+        }
+        .ld-bar-fill::after {
+            content:''; position:absolute;
+            right:-3px; top:-3px;
+            width:8px; height:8px;
+            background:var(--red-glow);
+            border-radius:50%;
+            box-shadow: 0 0 15px var(--red-glow), 0 0 30px var(--red);
+        }
+        .ld-info {
+            display:flex; justify-content:space-between;
+            margin-top:8px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:var(--gray-dark);
+        }
+        .ld-info .pct { color:var(--red); font-weight:600; }
 
-        .loading-stats .percent {
-            color: var(--red-primary);
-            font-weight: 600;
+        .ld-console {
+            margin-top:20px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:var(--gray-dark);
+            text-align:center;
+            position:relative; z-index:1;
         }
+        .ld-console em { color:var(--red); font-style:normal; }
 
-        .loading-log {
-            margin-top: 25px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: var(--text-muted);
-            text-align: center;
-            min-height: 16px;
-        }
-
-        .loading-log span {
-            color: var(--red-primary);
-        }
-
-        /* ==================== MAIN APP ==================== */
-        .main-app {
-            display: none;
-            min-height: 100vh;
-            position: relative;
-        }
-
-        .main-app.show {
-            display: block;
-            animation: appReveal 0.8s ease;
-        }
-
-        @keyframes appReveal {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        /* ===================== MAIN APP ===================== */
+        #app { display:none; min-height:100vh; }
+        #app.on { display:block; animation: appIn .8s ease; }
+        @keyframes appIn { from{opacity:0;} to{opacity:1;} }
 
         /* BG Effects */
-        .bg-grid {
-            position: fixed;
-            inset: 0;
+        .fx-grid {
+            position:fixed; inset:0;
             background-image:
-                linear-gradient(rgba(220,38,38,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(220,38,38,0.03) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-            z-index: 0;
+                linear-gradient(rgba(220,38,38,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(220,38,38,0.015) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events:none; z-index:0;
+        }
+        .fx-hole1 {
+            position:fixed; top:-15%; right:-15%;
+            width:800px; height:800px;
+            background:radial-gradient(circle, rgba(220,38,38,0.03) 0%, transparent 55%);
+            pointer-events:none; z-index:0;
+            animation: drift1 25s ease-in-out infinite;
+        }
+        .fx-hole2 {
+            position:fixed; bottom:-25%; left:-15%;
+            width:600px; height:600px;
+            background:radial-gradient(circle, rgba(127,29,29,0.04) 0%, transparent 55%);
+            pointer-events:none; z-index:0;
+            animation: drift1 30s ease-in-out infinite reverse;
+        }
+        .fx-hole3 {
+            position:fixed; top:40%; left:50%;
+            width:500px; height:500px;
+            transform:translate(-50%,-50%);
+            background:radial-gradient(circle, rgba(69,10,10,0.05) 0%, transparent 50%);
+            pointer-events:none; z-index:0;
+            animation: drift2 20s ease-in-out infinite;
+        }
+        @keyframes drift1 {
+            0%,100%{transform:translate(0,0);}
+            33%{transform:translate(25px,-15px);}
+            66%{transform:translate(-15px,25px);}
+        }
+        @keyframes drift2 {
+            0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.5;}
+            50%{transform:translate(-50%,-50%) scale(1.3);opacity:1;}
         }
 
-        .bg-blackhole {
-            position: fixed;
-            top: -20%;
-            right: -20%;
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(220,38,38,0.04) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-            animation: driftSlow 20s ease-in-out infinite;
+        #fxParticles { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+        .fp {
+            position:absolute; border-radius:50%;
+            background:var(--red);
+            opacity:0;
+            animation: fpAnim linear infinite;
+        }
+        @keyframes fpAnim {
+            0%{transform:translateY(100vh) scale(0) rotate(0);opacity:0;}
+            10%{opacity:.5;}
+            90%{opacity:.5;}
+            100%{transform:translateY(-20vh) scale(1) rotate(360deg);opacity:0;}
         }
 
-        .bg-blackhole-2 {
-            position: fixed;
-            bottom: -30%;
-            left: -20%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(127,29,29,0.06) 0%, transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-            animation: driftSlow 25s ease-in-out infinite reverse;
+        .fx-scanline {
+            position:fixed; inset:0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+            );
+            pointer-events:none; z-index:1;
         }
 
-        @keyframes driftSlow {
-            0%, 100% { transform: translate(0, 0); }
-            33% { transform: translate(30px, -20px); }
-            66% { transform: translate(-20px, 30px); }
+        .fx-vignette {
+            position:fixed; inset:0;
+            background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%);
+            pointer-events:none; z-index:1;
         }
 
-        .floating-particles {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
+        /* Pantun Ticker */
+        .pantun-bar {
+            position:relative; z-index:10;
+            background: rgba(220,38,38,0.04);
+            border-bottom: 1px solid var(--border);
             overflow: hidden;
+            height: 32px;
         }
-
-        .f-particle {
-            position: absolute;
-            background: var(--red-primary);
-            border-radius: 50%;
-            opacity: 0;
-            animation: floatParticle linear infinite;
+        .pantun-track {
+            display: flex;
+            animation: tickerScroll 60s linear infinite;
+            height: 100%;
+            align-items: center;
         }
-
-        @keyframes floatParticle {
-            0% { transform: translateY(100vh) scale(0); opacity: 0; }
-            15% { opacity: 0.6; }
-            85% { opacity: 0.6; }
-            100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+        @keyframes tickerScroll {
+            0%{transform:translateX(0);}
+            100%{transform:translateX(-50%);}
         }
+        .pantun-item {
+            white-space: nowrap;
+            padding: 0 40px;
+            font-size: 10px;
+            color: var(--gray);
+            font-style: italic;
+            flex-shrink: 0;
+        }
+        .pantun-item em { color:var(--red-dark); font-style:normal; }
 
         /* Header */
-        .app-header {
-            position: relative;
-            z-index: 10;
-            padding: 35px 20px 25px;
+        .hdr {
+            position:relative; z-index:10;
+            padding: 30px 20px 22px;
             text-align: center;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
         }
-
-        .app-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--red-primary), transparent);
+        .hdr::after {
+            content:''; position:absolute;
+            bottom:-1px; left:50%;
+            transform:translateX(-50%);
+            width:80px; height:2px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
         }
-
-        .header-logo-wrap {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 18px;
+        .hdr-logo-w {
+            position:relative; display:inline-block;
+            margin-bottom:15px;
         }
-
-        .header-logo-wrap::before {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            border: 1px solid var(--border-color);
-            animation: logoBorderRotate 8s linear infinite;
+        .hdr-logo-w::before {
+            content:''; position:absolute; inset:-8px;
+            border-radius:50%;
+            border: 1px solid var(--border);
+            animation: rSpin 10s linear infinite;
         }
-
-        @keyframes logoBorderRotate {
-            to { transform: rotate(360deg); }
+        .hdr-logo-w::after {
+            content:''; position:absolute; inset:-14px;
+            border-radius:50%;
+            border: 1px dashed rgba(220,38,38,0.06);
+            animation: rSpin 15s linear infinite reverse;
         }
-
-        .header-logo {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--red-dark);
-            display: block;
+        .hdr-logo {
+            width:65px; height:65px;
+            border-radius:50%; object-fit:cover;
+            border:2px solid var(--red-dark);
+            display:block;
         }
-
-        .header-title {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 4px;
+        .hdr h1 {
+            font-family:'Orbitron',sans-serif;
+            font-size:18px; font-weight:800;
+            letter-spacing:1px; margin-bottom:3px;
         }
-
-        .header-title span { color: var(--red-primary); }
-
-        .header-sub {
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 3px;
-            text-transform: uppercase;
+        .hdr h1 span { color:var(--red); }
+        .hdr .sub {
+            font-size:9px; color:var(--gray-dark);
+            letter-spacing:3px; text-transform:uppercase;
         }
-
-        .header-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 12px;
-            padding: 4px 14px;
-            background: rgba(220,38,38,0.06);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            font-size: 10px;
-            color: var(--red-primary);
-            font-family: 'JetBrains Mono', monospace;
+        .hdr .badge {
+            display:inline-flex; align-items:center; gap:5px;
+            margin-top:10px; padding:3px 12px;
+            background:rgba(220,38,38,0.05);
+            border:1px solid var(--border);
+            border-radius:20px;
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:var(--red);
         }
-
-        .header-status .dot {
-            width: 6px;
-            height: 6px;
-            background: var(--red-primary);
-            border-radius: 50%;
-            animation: dotBlink 2s infinite;
+        .hdr .badge .dot {
+            width:5px; height:5px;
+            background:var(--red);
+            border-radius:50%;
+            animation: blink 2s infinite;
         }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
 
-        @keyframes dotBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+        /* Nav Tabs (Dashboard) */
+        .nav-tabs {
+            position:relative; z-index:10;
+            display:flex;
+            border-bottom: 1px solid var(--border);
+            background: rgba(6,6,12,0.8);
+            backdrop-filter: blur(10px);
+            position: sticky; top: 0;
+            z-index: 100;
         }
-
-        /* Container */
-        .app-container {
-            position: relative;
-            z-index: 10;
-            max-width: 520px;
-            margin: 0 auto;
-            padding: 25px 16px 50px;
+        .nav-tab {
+            flex:1;
+            padding:14px 8px;
+            text-align:center;
+            font-family:'JetBrains Mono',monospace;
+            font-size:10px;
+            color:var(--gray-dark);
+            cursor:pointer;
+            border:none; background:none;
+            transition: all .3s;
+            position:relative;
+            letter-spacing:1px;
         }
-
-        /* Section titles */
-        .section-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
-            margin-top: 8px;
+        .nav-tab:hover { color:var(--gray); background:rgba(220,38,38,0.03); }
+        .nav-tab.on { color:var(--red); }
+        .nav-tab.on::after {
+            content:''; position:absolute;
+            bottom:0; left:50%; transform:translateX(-50%);
+            width:30px; height:2px;
+            background:var(--red);
         }
+        .nav-tab .nav-icon { font-size:16px; display:block; margin-bottom:3px; }
 
-        .section-label .line {
-            flex: 1;
-            height: 1px;
-            background: var(--border-color);
+        /* Dashboard Pages */
+        .dash { display:none; position:relative; z-index:10; }
+        .dash.on { display:block; animation: panelIn .4s ease; }
+        @keyframes panelIn { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:translateY(0);} }
+
+        .ctn { max-width:520px; margin:0 auto; padding:20px 16px 50px; }
+
+        /* Section Label */
+        .slbl {
+            display:flex; align-items:center; gap:8px;
+            margin-bottom:12px; margin-top:8px;
         }
-
-        .section-label span {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            white-space: nowrap;
+        .slbl .ln { flex:1; height:1px; background:var(--border); }
+        .slbl span {
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:var(--gray-dark);
+            letter-spacing:2px; text-transform:uppercase;
+            white-space:nowrap;
         }
 
         /* Email Selector */
-        .email-selector {
-            margin-bottom: 24px;
+        .em-opts { display:flex; gap:8px; margin-bottom:22px; }
+        .em-opt {
+            flex:1; padding:12px 8px;
+            background:var(--bg-card);
+            border:1px solid var(--border);
+            border-radius:10px;
+            color:var(--gray);
+            font-family:'JetBrains Mono',monospace;
+            font-size:8px; cursor:pointer;
+            transition: all .3s;
+            text-align:center;
+            position:relative;
         }
-
-        .email-options {
-            display: flex;
-            gap: 8px;
+        .em-opt .ei { font-size:16px; display:block; margin-bottom:5px; }
+        .em-opt:hover { background:var(--bg-hover); border-color:var(--border-h); }
+        .em-opt.on {
+            border-color:var(--red); background:rgba(220,38,38,0.05);
+            color:var(--red); box-shadow:0 0 15px rgba(220,38,38,0.08);
         }
-
-        .email-opt {
-            flex: 1;
-            padding: 12px 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .email-opt .email-icon {
-            font-size: 18px;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .email-opt:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
-        }
-
-        .email-opt.active {
-            border-color: var(--red-primary);
-            background: rgba(220,38,38,0.06);
-            color: var(--red-primary);
-            box-shadow: 0 0 20px rgba(220,38,38,0.1);
-        }
-
-        .email-opt.active::before {
-            content: '✓';
-            position: absolute;
-            top: 6px;
-            right: 8px;
-            font-size: 10px;
-            color: var(--red-primary);
+        .em-opt.on::before {
+            content:'✓'; position:absolute;
+            top:5px; right:7px; font-size:9px; color:var(--red);
         }
 
         /* Category Tabs */
-        .category-tabs {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 20px;
+        .cat-tabs { display:flex; gap:6px; margin-bottom:18px; }
+        .ct {
+            flex:1; padding:13px 6px;
+            background:var(--bg-card);
+            border:1px solid var(--border);
+            border-radius:11px;
+            color:var(--gray);
+            font-size:11px; font-weight:600;
+            cursor:pointer; transition:all .3s;
+            text-align:center; position:relative;
+        }
+        .ct .ci { font-size:20px; display:block; margin-bottom:5px; }
+        .ct .cn { display:block; font-size:10px; }
+        .ct .cd { display:block; font-size:7px; color:var(--gray-dark); margin-top:2px; font-weight:400; }
+        .ct:hover { background:var(--bg-hover); border-color:var(--border-h); transform:translateY(-1px); }
+        .ct.on {
+            border-color:var(--red); background:rgba(220,38,38,0.06);
+            color:var(--white); box-shadow:0 3px 15px rgba(220,38,38,0.12);
+        }
+        .ct.on::after {
+            content:''; position:absolute;
+            bottom:-1px; left:50%; transform:translateX(-50%);
+            width:20px; height:2px; background:var(--red); border-radius:2px;
         }
 
-        .cat-tab {
-            flex: 1;
-            padding: 14px 8px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-secondary);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            position: relative;
-        }
+        /* Variant Cards */
+        .vpanel { display:none; }
+        .vpanel.on { display:block; animation:panelIn .4s ease; }
 
-        .cat-tab .tab-icon {
-            font-size: 22px;
-            display: block;
-            margin-bottom: 6px;
+        .vgrid {
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px,1fr));
+            gap:7px; margin-bottom:18px;
         }
-
-        .cat-tab .tab-name {
-            display: block;
-            font-size: 11px;
+        .vc {
+            padding:12px 10px;
+            background:var(--bg-card);
+            border:1px solid var(--border);
+            border-radius:9px;
+            cursor:pointer; transition:all .3s;
+            position:relative; overflow:hidden;
         }
-
-        .cat-tab .tab-desc {
-            display: block;
-            font-size: 8px;
-            color: var(--text-muted);
-            margin-top: 2px;
-            font-weight: 400;
-        }
-
-        .cat-tab:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
-            transform: translateY(-2px);
-        }
-
-        .cat-tab.active {
-            border-color: var(--red-primary);
-            background: rgba(220,38,38,0.08);
-            color: var(--text-primary);
-            box-shadow: 0 4px 20px rgba(220,38,38,0.15);
-        }
-
-        .cat-tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 2px;
-            background: var(--red-primary);
-            border-radius: 2px;
-        }
-
-        /* Text Variant Cards */
-        .variant-panel {
-            display: none;
-        }
-
-        .variant-panel.show {
-            display: block;
-            animation: panelSlide 0.4s ease;
-        }
-
-        @keyframes panelSlide {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .variant-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .variant-card {
-            padding: 14px 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .variant-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
+        .vc::before {
+            content:''; position:absolute;
+            top:0; left:0; right:0; height:2px;
             background: linear-gradient(90deg, transparent, var(--red-dark), transparent);
-            opacity: 0;
-            transition: opacity 0.3s;
+            opacity:0; transition:opacity .3s;
+        }
+        .vc:hover { border-color:var(--border-h); background:var(--bg-hover); transform:translateY(-1px); }
+        .vc:hover::before { opacity:1; }
+        .vc.sel {
+            border-color:var(--red); background:rgba(220,38,38,0.06);
+            box-shadow:0 0 12px rgba(220,38,38,0.08);
+        }
+        .vc.sel::before { opacity:1; background:var(--red); }
+        .vc .vtag {
+            font-family:'JetBrains Mono',monospace;
+            font-size:8px; color:var(--red); letter-spacing:1px;
+            text-transform:uppercase; margin-bottom:3px;
+        }
+        .vc .vtitle { font-size:12px; font-weight:600; margin-bottom:3px; }
+        .vc .vlang { font-size:8px; color:var(--gray-dark); }
+        .vc .vchk {
+            position:absolute; top:8px; right:8px;
+            width:16px; height:16px; border-radius:50%;
+            border:1px solid var(--border);
+            display:flex; align-items:center; justify-content:center;
+            font-size:8px; transition:all .3s;
+        }
+        .vc.sel .vchk {
+            background:var(--red); border-color:var(--red); color:#fff;
         }
 
-        .variant-card:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-card-hover);
-            transform: translateY(-1px);
-        }
+        /* Input Section */
+        .inp-sec { display:none; margin-top:5px; }
+        .inp-sec.on { display:block; animation:panelIn .4s ease; }
 
-        .variant-card:hover::before {
-            opacity: 1;
+        .ph-wrap {
+            display:flex; align-items:center;
+            background:var(--bg-card);
+            border:1px solid var(--border);
+            border-radius:11px;
+            overflow:hidden; transition:all .3s;
+            margin-bottom:14px;
         }
-
-        .variant-card.selected {
-            border-color: var(--red-primary);
-            background: rgba(220,38,38,0.08);
-            box-shadow: 0 0 15px rgba(220,38,38,0.1);
+        .ph-wrap:focus-within {
+            border-color:var(--red);
+            box-shadow:0 0 18px rgba(220,38,38,0.08);
         }
-
-        .variant-card.selected::before {
-            opacity: 1;
-            background: var(--red-primary);
+        .ph-pre {
+            padding:15px 12px;
+            background:rgba(220,38,38,0.05);
+            color:var(--red);
+            font-family:'JetBrains Mono',monospace;
+            font-weight:700; font-size:13px;
+            border-right:1px solid var(--border);
+            user-select:none;
         }
-
-        .variant-card .v-tag {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
-            color: var(--red-primary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
+        .ph-inp {
+            flex:1; padding:15px 12px;
+            background:transparent; border:none; outline:none;
+            color:var(--white);
+            font-family:'JetBrains Mono',monospace;
+            font-size:14px; letter-spacing:1px;
         }
+        .ph-inp::placeholder { color:#222; }
 
-        .variant-card .v-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
+        .sbtn {
+            width:100%; padding:17px;
+            background:linear-gradient(135deg, var(--red-deep), var(--red-dark), var(--red));
+            border:1px solid var(--red);
+            border-radius:11px;
+            color:#fff;
+            font-family:'Orbitron',sans-serif;
+            font-size:14px; font-weight:700;
+            cursor:pointer; transition:all .3s;
+            position:relative; overflow:hidden;
+            text-transform:uppercase; letter-spacing:1px;
         }
-
-        .variant-card .v-lang {
-            font-size: 9px;
-            color: var(--text-muted);
+        .sbtn::before {
+            content:''; position:absolute;
+            top:0; left:-100%; width:100%; height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            transition:left .6s;
         }
+        .sbtn:hover { transform:translateY(-2px); box-shadow:0 6px 25px rgba(220,38,38,0.25); }
+        .sbtn:hover::before { left:100%; }
+        .sbtn:active { transform:translateY(0); }
 
-        .variant-card .v-check {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            transition: all 0.3s;
+        .email-info {
+            margin-top:12px; padding:10px;
+            background:rgba(220,38,38,0.02);
+            border:1px solid var(--border);
+            border-radius:7px; text-align:center;
         }
-
-        .variant-card.selected .v-check {
-            background: var(--red-primary);
-            border-color: var(--red-primary);
-            color: #fff;
+        .email-info p {
+            font-family:'JetBrains Mono',monospace;
+            font-size:9px; color:var(--gray-dark);
         }
+        .email-info .ea { color:var(--red); font-weight:600; }
 
-        /* Phone Input */
-        .input-section {
-            display: none;
-            margin-top: 5px;
-        }
-
-        .input-section.show {
-            display: block;
-            animation: panelSlide 0.4s ease;
-        }
-
-        .phone-wrap {
-            display: flex;
-            align-items: center;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            margin-bottom: 16px;
-        }
-
-        .phone-wrap:focus-within {
-            border-color: var(--red-primary);
-            box-shadow: 0 0 20px rgba(220,38,38,0.1);
-        }
-
-        .phone-prefix {
-            padding: 16px 14px;
-            background: rgba(220,38,38,0.06);
-            color: var(--red-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700;
-            font-size: 14px;
-            border-right: 1px solid var(--border-color);
-            user-select: none;
-        }
-
-        .phone-field {
-            flex: 1;
-            padding: 16px 14px;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 14px;
-            letter-spacing: 1px;
-        }
-
-        .phone-field::placeholder {
-            color: #333;
-        }
-
-        /* Submit Button */
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--red-dark), var(--red-primary));
-            border: 1px solid var(--red-primary);
-            border-radius: 12px;
-            color: #fff;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .submit-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.6s ease;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(220,38,38,0.3);
-        }
-
-        .submit-btn:hover::before {
-            left: 100%;
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .target-email-info {
-            margin-top: 14px;
-            padding: 12px;
-            background: rgba(220,38,38,0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+        /* ===================== CREDIT DASHBOARD ===================== */
+        .credit-dash {
+            padding: 40px 20px;
             text-align: center;
         }
-
-        .target-email-info p {
-            font-size: 10px;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .target-email-info .email-addr {
-            color: var(--red-primary);
-            font-weight: 600;
-        }
-
-        /* ==================== SUCCESS POPUP ==================== */
-        .popup-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
-            z-index: 99999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .popup-overlay.show {
-            display: flex;
-            animation: popOverlayIn 0.3s ease;
-        }
-
-        @keyframes popOverlayIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .popup-box {
-            width: 100%;
-            max-width: 380px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--red-primary);
+        .credit-card {
+            max-width: 420px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            animation: popBoxIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-
-        @keyframes popBoxIn {
-            from { opacity: 0; transform: scale(0.7) translateY(30px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+        .credit-card::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(ellipse at top, rgba(220,38,38,0.06) 0%, transparent 60%);
+            pointer-events:none;
         }
-
-        .popup-header {
-            padding: 30px 20px 20px;
-            text-align: center;
+        .credit-top {
+            padding: 35px 20px 20px;
             position: relative;
-            overflow: hidden;
         }
-
-        .popup-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at center, rgba(220,38,38,0.1) 0%, transparent 50%);
-            animation: popGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes popGlow {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.2); opacity: 1; }
-        }
-
-        .popup-emoji {
-            font-size: 50px;
+        .credit-crown {
+            font-size: 45px;
             display: block;
             margin-bottom: 15px;
-            position: relative;
-            z-index: 1;
-            animation: emojiShake 0.5s ease 0.3s;
+            animation: crownFloat 3s ease-in-out infinite;
         }
-
-        @keyframes emojiShake {
-            0%, 100% { transform: rotate(0); }
-            25% { transform: rotate(-10deg); }
-            75% { transform: rotate(10deg); }
+        @keyframes crownFloat {
+            0%,100%{transform:translateY(0);}
+            50%{transform:translateY(-8px);}
         }
-
-        .popup-title {
-            font-family: 'JetBrains Mono', monospace;
+        .credit-arrival {
+            font-family: 'Orbitron', sans-serif;
             font-size: 22px;
-            font-weight: 800;
-            color: var(--red-primary);
-            margin-bottom: 5px;
-            position: relative;
-            z-index: 1;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, #ccc, #fff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shineText 4s ease infinite;
+            margin-bottom: 20px;
+            line-height: 1.3;
         }
-
-        .popup-credit {
-            font-size: 11px;
-            color: var(--text-muted);
-            position: relative;
-            z-index: 1;
-            line-height: 1.7;
+        @keyframes shineText {
+            0%{background-position:200% 50%;}
+            100%{background-position:-200% 50%;}
         }
-
-        .popup-credit strong {
-            color: var(--text-secondary);
+        .credit-divider {
+            width: 60px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--red), transparent);
+            margin: 0 auto 20px;
         }
-
-        .popup-body {
-            padding: 0 20px 25px;
-            text-align: center;
-        }
-
-        .popup-btn {
-            width: 100%;
-            padding: 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .popup-btn:hover {
-            border-color: var(--red-primary);
-            background: rgba(220,38,38,0.08);
-            transform: translateY(-1px);
-        }
-
-        /* Footer */
-        .app-footer {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .app-footer p {
+        .credit-label {
             font-family: 'JetBrains Mono', monospace;
             font-size: 9px;
-            color: #333;
+            color: var(--gray-dark);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .credit-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--white);
+            margin-bottom: 8px;
+        }
+        .credit-title {
+            font-size: 14px;
+            color: var(--red);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .credit-title span { font-size: 16px; }
+        .credit-member {
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        .credit-member span { font-size: 14px; }
+        .credit-bottom {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border);
+            background: rgba(0,0,0,0.3);
+        }
+        .credit-copy {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            color: var(--gray-dark);
             letter-spacing: 1px;
         }
 
-        .app-footer .f-heart {
-            color: var(--red-primary);
-            display: inline-block;
-            animation: heartPump 1.5s infinite;
+        /* Music Player */
+        .music-player {
+            max-width: 420px;
+            margin: 20px auto 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mp-btn {
+            width: 40px; height: 40px;
+            background: rgba(220,38,38,0.08);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            color: var(--red);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all .3s;
+            flex-shrink: 0;
+        }
+        .mp-btn:hover {
+            background: rgba(220,38,38,0.15);
+            border-color: var(--red);
+            transform: scale(1.05);
+        }
+        .mp-info { flex:1; min-width:0; }
+        .mp-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mp-artist {
+            font-size: 9px;
+            color: var(--gray-dark);
+        }
+        .mp-visual {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        .mp-bar-v {
+            width: 3px;
+            background: var(--red);
+            border-radius: 2px;
+            animation: mpBarAnim 1s ease-in-out infinite;
+            animation-play-state: paused;
+        }
+        .mp-bar-v.playing { animation-play-state: running; }
+        .mp-bar-v:nth-child(1){height:8px;animation-delay:0s;}
+        .mp-bar-v:nth-child(2){height:14px;animation-delay:.1s;}
+        .mp-bar-v:nth-child(3){height:6px;animation-delay:.2s;}
+        .mp-bar-v:nth-child(4){height:18px;animation-delay:.3s;}
+        .mp-bar-v:nth-child(5){height:10px;animation-delay:.15s;}
+        @keyframes mpBarAnim {
+            0%,100%{height:4px;}
+            50%{height:18px;}
         }
 
-        @keyframes heartPump {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3); }
+        /* ===================== POPUP ===================== */
+        .pop-overlay {
+            position:fixed; inset:0;
+            background:rgba(0,0,0,0.9);
+            backdrop-filter:blur(15px);
+            z-index:99999;
+            display:none;
+            align-items:center; justify-content:center;
+            padding:20px;
+        }
+        .pop-overlay.on { display:flex; animation: popOvIn .3s ease; }
+        @keyframes popOvIn { from{opacity:0;} to{opacity:1;} }
+
+        .pop-box {
+            width:100%; max-width:380px;
+            background: var(--bg-deep);
+            border:1px solid var(--red);
+            border-radius:18px;
+            overflow:hidden;
+            animation: popBoxIn .5s cubic-bezier(.34,1.56,.64,1);
+            position:relative;
+        }
+        @keyframes popBoxIn {
+            from{opacity:0;transform:scale(.6) translateY(30px);}
+            to{opacity:1;transform:scale(1) translateY(0);}
+        }
+        .pop-box::before {
+            content:''; position:absolute; inset:0;
+            background: radial-gradient(circle at 50% 20%, rgba(220,38,38,0.08) 0%, transparent 50%);
+            pointer-events:none;
+        }
+        .pop-hdr {
+            padding:30px 20px 18px;
+            text-align:center;
+            position:relative;
+        }
+        .pop-emoji {
+            font-size:50px; display:block;
+            margin-bottom:12px;
+            animation: emoShake .6s ease .3s;
+        }
+        @keyframes emoShake {
+            0%,100%{transform:rotate(0);}
+            25%{transform:rotate(-12deg);}
+            75%{transform:rotate(12deg);}
+        }
+        .pop-title {
+            font-family:'Orbitron',sans-serif;
+            font-size:20px; font-weight:800;
+            color:var(--red);
+            margin-bottom:6px;
+        }
+        .pop-credit {
+            font-size:11px; color:var(--gray-dark);
+            line-height:1.7;
+        }
+        .pop-credit strong { color:var(--gray); }
+        .pop-body { padding:0 20px 22px; text-align:center; }
+        .pop-btn {
+            width:100%; padding:15px;
+            background:var(--bg-card);
+            border:1px solid var(--border);
+            border-radius:11px;
+            color:var(--white);
+            font-family:'Space Grotesk',sans-serif;
+            font-size:12px; font-weight:600;
+            cursor:pointer; transition:all .3s;
+        }
+        .pop-btn:hover {
+            border-color:var(--red);
+            background:rgba(220,38,38,0.06);
+            transform:translateY(-1px);
         }
 
-        /* Mobile Responsive */
-        @media (max-width: 420px) {
-            .variant-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            .email-options {
-                flex-direction: column;
-            }
-            .header-title { font-size: 17px; }
-            .cat-tab .tab-icon { font-size: 18px; }
-            .cat-tab .tab-name { font-size: 10px; }
+        /* Footer */
+        .ftr {
+            position:relative; z-index:10;
+            text-align:center;
+            padding:18px 20px;
+            border-top:1px solid var(--border);
+        }
+        .ftr p {
+            font-family:'JetBrains Mono',monospace;
+            font-size:8px; color:#222; letter-spacing:1px;
+        }
+        .ftr .fh { color:var(--red); display:inline-block; animation:heartP 1.5s infinite; }
+        @keyframes heartP { 0%,100%{transform:scale(1);} 50%{transform:scale(1.3);} }
+
+        @media(max-width:420px) {
+            .vgrid { grid-template-columns: 1fr 1fr; }
+            .em-opts { flex-direction:column; }
+            .hdr h1 { font-size:15px; }
+            .ct .ci { font-size:16px; }
+            .ct .cn { font-size:9px; }
+            .credit-arrival { font-size:17px; letter-spacing:2px; }
+            .credit-name { font-size:22px; }
         }
     </style>
 </head>
 <body>
 
-<!-- ==================== LOADING SCREEN ==================== -->
-<div class="loading-screen" id="loadingScreen">
-    <div class="loading-bg-effect"></div>
-    <div class="loading-ring">
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="ring-core">
+<!-- ===================== LOADING ===================== -->
+<div id="loadScreen">
+    <div class="ld-blackhole"></div>
+    <div class="ld-orb-field" id="ldOrbs"></div>
+    <div class="ld-rings">
+        <div class="rg"></div><div class="rg"></div><div class="rg"></div><div class="rg"></div>
+        <div class="rg-core">
             <img src="https://cdn.phototourl.com/free/2026-07-22-fb5d9d8e-b7ba-411f-a956-de13a8ad0a47.jpg" alt="" onerror="this.style.display='none'">
         </div>
     </div>
-    <div class="loading-brand">Unban <span>Impluse</span> X Suki</div>
-    <div class="loading-tagline">Recovery System</div>
-    <div class="loading-progress-wrap">
-        <div class="loading-progress-bar">
-            <div class="loading-progress-fill" id="loadFill"></div>
-        </div>
-        <div class="loading-stats">
-            <span id="loadLog">init::system</span>
-            <span class="percent" id="loadPercent">0%</span>
+    <div class="ld-brand">UNBAN <span>IMPLUSE</span> X SUKI</div>
+    <div class="ld-ver">v2.0 // recovery system</div>
+    <div class="ld-bar-wrap">
+        <div class="ld-bar"><div class="ld-bar-fill" id="ldFill"></div></div>
+        <div class="ld-info">
+            <span id="ldMod">init::boot</span>
+            <span class="pct" id="ldPct">0%</span>
         </div>
     </div>
-    <div class="loading-log" id="loadStatus">
-        <span>&gt;</span> Booting modules...
-    </div>
+    <div class="ld-console" id="ldCon"><em>&gt;</em> Initializing core...</div>
 </div>
 
-<!-- ==================== MAIN APP ==================== -->
-<div class="main-app" id="mainApp">
+<!-- ===================== MAIN APP ===================== -->
+<div id="app">
+    <div class="fx-grid"></div>
+    <div class="fx-hole1"></div>
+    <div class="fx-hole2"></div>
+    <div class="fx-hole3"></div>
+    <div id="fxParticles"></div>
+    <div class="fx-scanline"></div>
+    <div class="fx-vignette"></div>
 
-    <div class="bg-grid"></div>
-    <div class="bg-blackhole"></div>
-    <div class="bg-blackhole-2"></div>
-    <div class="floating-particles" id="floatingParticles"></div>
+    <!-- Pantun Ticker -->
+    <div class="pantun-bar">
+        <div class="pantun-track" id="pantunTrack"></div>
+    </div>
 
     <!-- Header -->
-    <div class="app-header">
-        <div class="header-logo-wrap">
-            <img src="https://cdn.phototourl.com/free/2026-07-22-fb5d9d8e-b7ba-411f-a956-de13a8ad0a47.jpg" alt="Logo" class="header-logo" onerror="this.style.background='linear-gradient(135deg, #991b1b, #dc2626)'">
+    <div class="hdr">
+        <div class="hdr-logo-w">
+            <img src="https://cdn.phototourl.com/free/2026-07-22-fb5d9d8e-b7ba-411f-a956-de13a8ad0a47.jpg" alt="" class="hdr-logo" onerror="this.style.background='linear-gradient(135deg,#991b1b,#dc2626)'">
         </div>
-        <div class="header-title">Unban <span>Impluse</span> X Suki</div>
-        <div class="header-sub">whatsapp recovery tool</div>
-        <div class="header-status">
-            <div class="dot"></div>
-            SYS_ONLINE
+        <h1>UNBAN <span>IMPLUSE</span> X SUKI</h1>
+        <div class="sub">whatsapp recovery tool v2.0</div>
+        <div class="badge"><div class="dot"></div>SYS_ONLINE // 2026</div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-tabs">
+        <button class="nav-tab on" onclick="switchDash('unban')">
+            <span class="nav-icon">⚡</span>UNBAN
+        </button>
+        <button class="nav-tab" onclick="switchDash('credit')">
+            <span class="nav-icon">👑</span>CREDIT
+        </button>
+    </div>
+
+    <!-- ===== UNBAN DASHBOARD ===== -->
+    <div class="dash on" id="dash-unban">
+        <div class="ctn">
+
+            <!-- Email Selector -->
+            <div class="slbl"><div class="ln"></div><span>// target email</span><div class="ln"></div></div>
+            <div class="em-opts">
+                <div class="em-opt on" onclick="pickEmail(this,'smb@support.whatsapp.com')">
+                    <span class="ei">📧</span>smb@support.whatsapp.com
+                </div>
+                <div class="em-opt" onclick="pickEmail(this,'support@support.whatsapp.com')">
+                    <span class="ei">📨</span>support@support.whatsapp.com
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="slbl"><div class="ln"></div><span>// kategori</span><div class="ln"></div></div>
+            <div class="cat-tabs">
+                <div class="ct" onclick="pickCat('unban',this)">
+                    <span class="ci">🔓</span><span class="cn">Unban</span><span class="cd">Standard</span>
+                </div>
+                <div class="ct" onclick="pickCat('spam',this)">
+                    <span class="ci">⚠️</span><span class="cn">Spam</span><span class="cd">Report</span>
+                </div>
+                <div class="ct" onclick="pickCat('perm',this)">
+                    <span class="ci">🚫</span><span class="cn">Permanen</span><span class="cd">Permanent</span>
+                </div>
+            </div>
+
+            <!-- UNBAN Variants -->
+            <div class="vpanel" id="vp-unban">
+                <div class="slbl"><div class="ln"></div><span>// pilih template</span><div class="ln"></div></div>
+                <div class="vgrid" id="vg-unban"></div>
+            </div>
+
+            <!-- SPAM Variants -->
+            <div class="vpanel" id="vp-spam">
+                <div class="slbl"><div class="ln"></div><span>// pilih template</span><div class="ln"></div></div>
+                <div class="vgrid" id="vg-spam"></div>
+            </div>
+
+            <!-- PERM Variants -->
+            <div class="vpanel" id="vp-perm">
+                <div class="slbl"><div class="ln"></div><span>// pilih template</span><div class="ln"></div></div>
+                <div class="vgrid" id="vg-perm"></div>
+            </div>
+
+            <!-- Input -->
+            <div class="inp-sec" id="inpSec">
+                <div class="slbl"><div class="ln"></div><span>// nomor whatsapp</span><div class="ln"></div></div>
+                <div class="ph-wrap">
+                    <div class="ph-pre">+62</div>
+                    <input type="tel" class="ph-inp" id="phoneInp" placeholder="8xxxxxxxxxx" maxlength="13">
+                </div>
+                <button class="sbtn" onclick="sendIt()">UNBAN WA 🥵</button>
+                <div class="email-info">
+                    <p>Mengirim ke → <span class="ea" id="emailDisp">smb@support.whatsapp.com</span></p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Content -->
-    <div class="app-container">
-
-        <!-- Email Selector -->
-        <div class="section-label">
-            <div class="line"></div>
-            <span>// Target Email</span>
-            <div class="line"></div>
-        </div>
-
-        <div class="email-selector">
-            <div class="email-options">
-                <div class="email-opt active" onclick="selectEmail(this, 'smb@support.whatsapp.com')">
-                    <span class="email-icon">📧</span>
-                    smb@support.whatsapp.com
+    <!-- ===== CREDIT DASHBOARD ===== -->
+    <div class="dash" id="dash-credit">
+        <div class="credit-dash">
+            <div class="credit-card">
+                <div class="credit-top">
+                    <span class="credit-crown">👑</span>
+                    <div class="credit-arrival">THE KING<br>HAS ARRIVED</div>
+                    <div class="credit-divider"></div>
+                    <div class="credit-label">Made by</div>
+                    <div class="credit-name">IMPLUSE</div>
+                    <div class="credit-title">The King of All <span>😈👿☠️</span></div>
+                    <div class="credit-member">Member Suki Team <span>🥵</span></div>
                 </div>
-                <div class="email-opt" onclick="selectEmail(this, 'support@support.whatsapp.com')">
-                    <span class="email-icon">📨</span>
-                    support@support.whatsapp.com
+                <div class="credit-bottom">
+                    <div class="credit-copy">©Unban Whatsapp.2026®</div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Category Tabs -->
-        <div class="section-label">
-            <div class="line"></div>
-            <span>// Pilih Kategori</span>
-            <div class="line"></div>
-        </div>
-
-        <div class="category-tabs">
-            <div class="cat-tab" onclick="selectCategory('unban')">
-                <span class="tab-icon">🔓</span>
-                <span class="tab-name">Unban</span>
-                <span class="tab-desc">Standard</span>
-            </div>
-            <div class="cat-tab" onclick="selectCategory('spam')">
-                <span class="tab-icon">⚠️</span>
-                <span class="tab-name">Spam</span>
-                <span class="tab-desc">Report</span>
-            </div>
-            <div class="cat-tab" onclick="selectCategory('perm')">
-                <span class="tab-icon">🚫</span>
-                <span class="tab-name">Permanen</span>
-                <span class="tab-desc">Permanent</span>
-            </div>
-        </div>
-
-        <!-- Unban Variants -->
-        <div class="variant-panel" id="panel-unban">
-            <div class="section-label">
-                <div class="line"></div>
-                <span>// Pilih Template</span>
-                <div class="line"></div>
-            </div>
-            <div class="variant-grid">
-                <div class="variant-card" onclick="selectVariant(this, 'unban', 0)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">UB-01</div>
-                    <div class="v-title">Unban v1</div>
-                    <div class="v-lang">🇮🇳 Hindi</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'unban', 1)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">UB-02</div>
-                    <div class="v-title">Unban v2</div>
-                    <div class="v-lang">🇧🇷 Portugis</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'unban', 2)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">UB-03</div>
-                    <div class="v-title">Unban v3</div>
-                    <div class="v-lang">🇷🇺 Rusia</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Spam Variants -->
-        <div class="variant-panel" id="panel-spam">
-            <div class="section-label">
-                <div class="line"></div>
-                <span>// Pilih Template</span>
-                <div class="line"></div>
-            </div>
-            <div class="variant-grid">
-                <div class="variant-card" onclick="selectVariant(this, 'spam', 0)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">SP-01</div>
-                    <div class="v-title">Spam Text 1</div>
-                    <div class="v-lang">🇮🇩 Indonesia</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'spam', 1)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">SP-02</div>
-                    <div class="v-title">Spam Text 2</div>
-                    <div class="v-lang">🇮🇩 Indonesia</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'spam', 2)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">SP-03</div>
-                    <div class="v-title">Spam Text 3</div>
-                    <div class="v-lang">🇬🇧 English + 🇧🇷 PT</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'spam', 3)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">SP-04</div>
-                    <div class="v-title">Spam Text 4</div>
-                    <div class="v-lang">🇧🇷 Portugis</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'spam', 4)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">SP-05</div>
-                    <div class="v-title">Spam Text 5</div>
-                    <div class="v-lang">🇧🇷 PT + 🇬🇧 EN</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Perm Variants -->
-        <div class="variant-panel" id="panel-perm">
-            <div class="section-label">
-                <div class="line"></div>
-                <span>// Pilih Template</span>
-                <div class="line"></div>
-            </div>
-            <div class="variant-grid">
-                <div class="variant-card" onclick="selectVariant(this, 'perm', 0)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">PM-01</div>
-                    <div class="v-title">Perm Text 1</div>
-                    <div class="v-lang">🇮🇩 Indonesia</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'perm', 1)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">PM-02</div>
-                    <div class="v-title">Perm Text 2</div>
-                    <div class="v-lang">🇬🇧 English</div>
-                </div>
-                <div class="variant-card" onclick="selectVariant(this, 'perm', 2)">
-                    <div class="v-check">✓</div>
-                    <div class="v-tag">PM-03</div>
-                    <div class="v-title">Perm Text 3</div>
-                    <div class="v-lang">🇸🇦 Arabic</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Input Section -->
-        <div class="input-section" id="inputSection">
-            <div class="section-label">
-                <div class="line"></div>
-                <span>// Nomor WhatsApp</span>
-                <div class="line"></div>
             </div>
 
-            <div class="phone-wrap">
-                <div class="phone-prefix">+62</div>
-                <input type="tel" class="phone-field" id="phoneInput" placeholder="8xxxxxxxxxx" maxlength="13">
-            </div>
-
-            <button class="submit-btn" onclick="sendEmail()">
-                Unban WA 🥵
-            </button>
-
-            <div class="target-email-info">
-                <p>Mengirim ke → <span class="email-addr" id="targetEmailDisplay">smb@support.whatsapp.com</span></p>
+            <!-- Music Player -->
+            <div class="music-player" id="musicPlayer">
+                <button class="mp-btn" id="mpBtn" onclick="toggleMusic()">▶</button>
+                <div class="mp-info">
+                    <div class="mp-title">Chill Lofi Beat</div>
+                    <div class="mp-artist">Background Music</div>
+                </div>
+                <div class="mp-visual">
+                    <div class="mp-bar-v" id="mb1"></div>
+                    <div class="mp-bar-v" id="mb2"></div>
+                    <div class="mp-bar-v" id="mb3"></div>
+                    <div class="mp-bar-v" id="mb4"></div>
+                    <div class="mp-bar-v" id="mb5"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <div class="app-footer">
-        <p>BUILT WITH <span class="f-heart">♥</span> BY IMPLUSE X SUKI</p>
-        <p style="margin-top:4px;">© 2026 — ALL RIGHTS RESERVED</p>
+    <div class="ftr">
+        <p>BUILT WITH <span class="fh">♥</span> BY IMPLUSE X SUKI // 2026</p>
     </div>
 </div>
 
-<!-- ==================== SUCCESS POPUP ==================== -->
-<div class="popup-overlay" id="successPopup">
-    <div class="popup-box">
-        <div class="popup-header">
-            <span class="popup-emoji">😈😈</span>
-            <div class="popup-title">MurUband jir😈😈</div>
-            <div class="popup-credit">
+<!-- ===================== POPUP ===================== -->
+<div class="pop-overlay" id="popup">
+    <div class="pop-box">
+        <div class="pop-hdr">
+            <span class="pop-emoji">😈😈</span>
+            <div class="pop-title">MurUband jir😈😈</div>
+            <div class="pop-credit">
                 Credit by : <strong>Impluse</strong><br>
                 <strong>Suki X Impluse</strong>
             </div>
         </div>
-        <div class="popup-body">
-            <button class="popup-btn" onclick="closePopup()">
-                🔥 Mulai kirim email lagi bos
-            </button>
+        <div class="pop-body">
+            <button class="pop-btn" onclick="closePop()">🔥 Mulai kirim email lagi bos</button>
         </div>
     </div>
 </div>
 
+<!-- Audio -->
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_946bc3d301.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-    // ==================== DATA ====================
-    const templates = {
-        unban: [
-            `हेलो टीम, आपके सिस्टम ने गलती से मेरा नंबर बैन कर दिया। में आपसे अपना नंबर फिर से सक्रिय करने के लिए कहता है क्योंकि मेरा परिवार दूसरे वेज में है और मुझे उनले सासंद करने की आपकत [+62{NUM}]`,
+// ===================== DATA =====================
+const T = {
+    unban: [
+        { tag:'UB-01', title:'Unban v1', lang:'🇮🇳 Hindi',
+          text:`हेलो टीम, आपके सिस्टम ने गलती से मेरा नंबर बैन कर दिया। में आपसे अपना नंबर फिर से सक्रिय करने के लिए कहता है क्योंकि मेरा परिवार दूसरे वेज में है और मुझे उनले सासंद करने की आपकत [{NUM}]`},
+        { tag:'UB-02', title:'Unban v2', lang:'🇧🇷 Portugis',
+          text:`Olá sou Ridolfo, preciso da sua ajuda, meu celular foi roubado junto com ele está meu chip com WhatsApp, não quero bagunçar minhas coisas pessoais, como coisas da minha empresa e planos, quero meu número desativado! Até que que eu consiga recuperar o Sim ou tentar recuperar meu telefone! Número: [{NUM}]`},
+        { tag:'UB-03', title:'Unban v3', lang:'🇷🇺 Rusia',
+          text:`Здравствуйте, команда, ваша система по ошибке заблокировала мой номер. Я прошу вас повторно активировать мой номер, потому что у меня есть семья в другой стране, и мне нужно с ними общаться [{NUM}]`},
+        { tag:'UB-04', title:'Unban v4', lang:'🇮🇩 Indonesia',
+          text:`Halo Dukungan Whatsapp, Saya salah satu pengguna Whatsapp dengan nomor ({NUM}) Sayang Whatsapp Saya telah diblokir Saya meminta maaf karena telah menginstal aplikasi pihak third Karena kesalahan. Saya meminta untuk membuka blokir akun saya. Tolong bantu saya untuk memblokirnya segera mungkin`},
+        { tag:'UB-05', title:'Unban v5', lang:'🇮🇩 Indonesia',
+          text:`halo selamat pagi tolong whatsapp saya salah satu pengguna whatsapp dengan nomor berikut membuka aplikasi whatsapp ({NUM}) mendapatkan notifikasi yang berisikan bahwa nomor whatsapp telah diblokir dan tidak bisa menggunakan whatsapp sebelumnya saya hanya melakukan pengiriman chat seperti biasa ke teman teman saya, saya juga tidak mengetahui pelanggaran apa yang saya lakukan dengan permohonan maaf saya ini menjadi salah satu pertimbangan untuk mengaktifkan akun yang terblokir. terimakasih sebelumnya.: ({NUM})`},
+        { tag:'UB-06', title:'Unban v6', lang:'🇮🇩 Indonesia',
+          text:`Halo whatsapp, tolong pulihkan akun saya yang diblokir oleh pihak whatsapp nomor saya: ({NUM}) mohon kepada pihak whatsapp untuk memulihkan akun whatsapp saya tolong cek kembali dikarenakan saya tidak pernah melanggar apapun tentang ketentuan dan persyaratan whatsapp nomor ini sangat penting terimakasih`},
+        { tag:'UB-07', title:'Unban v7', lang:'🇬🇧 English',
+          text:`Please WhatsApp team, my number was hacked by an irresponsible hacker and they blamed me so my number was blocked by WhatsApp Please unblock my number ASAP. My number is {NUM}`},
+        { tag:'UB-08', title:'Unban v8', lang:'🇧🇷 Portugis',
+          text:`ola' Whatsapp, minha conta do Whatsapp foi bloqueada/desativada pelo WhatsApp e Mao Al tenha violadio os regulamentos do Whatsapp, abra minha conta do Whatsapp de volta ao norma EU possa interagir sem problemas novamente, Abra minha conta desativada [{NUM}]`},
+        { tag:'UB-09', title:'Unban v9', lang:'🇧🇷 Portugis',
+          text:`ola' Whatsapp, minha conta do Whatsapp foi bloqueada/desativada pelo WhatsApp e Mao M tenha violadio os regulamentos do Whatsapp, abra minha conta do Whatsapp de volta ao norma EU possa interagir sem problemas novamente, Abra minha conta desativada [{NUM}]`},
+        { tag:'UB-10', title:'Unban v10', lang:'🇮🇩 Indonesia',
+          text:`Halo pak, Akun Whatsapp Saya diblokir Saya Maaf Saya Telah Menginstal Aplikasi Pihak Ketiga. Tidak Sengaja. Harap Buka Blokir Akun Saya Sesegera Mungkin. Terimakasih: ({NUM})`},
+        { tag:'UB-11', title:'Unban v11', lang:'🇬🇧 English',
+          text:`Please reactivate my number because I didn't violate any WhatsApp rules, suddenly my number was banned, please reactivate this number: [{NUM}]`}
+    ],
+    spam: [
+        { tag:'SP-01', title:'Spam v1', lang:'🇮🇩 Indonesia',
+          text:`Halo WhatsApp yang saya hormati, Saya telah melakukan tindakkan ke seseorang yaitu Spam chat ke seseorang dan saya Ingin meminta maaf atas perilaku yang saya lakukan harap batalkan perblokiran ini dan pulihkan akun saya terimakasih [{NUM}]`},
+        { tag:'SP-02', title:'Spam v2', lang:'🇮🇩 Indonesia',
+          text:`Halo Yang terhormat WhatsApp saya tidak bisa mendapatkan login karena terblokir karena saya sudah melakukan spam ke seseorang yang saya kenal harap pulihkan kembali dan maafkan perilaku yang saya lakukan mohon maaf Dan Hapus blokir WhatsApp saya. Dan nomor WhatsApp saya adalah: {NUM}`},
+        { tag:'SP-03', title:'Spam v3', lang:'🇬🇧 EN + 🇧🇷 PT',
+          text:`Hello Dear WhatsApp Team, My name is Impluse I've been spamming someone and my behavior really makes other people angry. Please unblock this because I've been using WhatsApp for a long time. 2022" Because I don't know the meaning of this blocking because I have already done this, please remove this blocking as soon as possible, and my WhatsApp number is {NUM} 01. WhatsApp, quero pedir desculpas por ter feito meu perfil no whatsApp como adulto. Por favor, remova este bloqueio imediatamente porque estou atualmente`},
+        { tag:'SP-04', title:'Spam v4', lang:'🇧🇷 Portugis',
+          text:`estudando no ensino fundamental/ensino fundamental/ensino dio/escola profissionalizante/faculdade/trabalho e espero que vo entenda Quero dizer, meu nomero do WhatsApp: {NUM}`},
+        { tag:'SP-05', title:'Spam v5', lang:'🇧🇷 PT + 🇬🇧 EN',
+          text:`Ole moderador do whatsApp, Por favor desbloqueie porque criei um grupo e um de meus. amigos postou no grupo a foto de um adulto menor de 18 anos, por favor restaure. porque quero Pedi ao WhatsApp para analisar esse assunto com mais ate o o mais para que eu possa acessar o WhatsApp novamente. E meumero: {NUM} hello WhatsApp. Immediately restore my WhatsApp because I was banned by someone I don't know and access my number to WhatsApp again and my WhatsApp number: {NUM}`}
+    ],
+    perm: [
+        { tag:'PM-01', title:'Perm v1', lang:'🇮🇩 Indonesia',
+          text:`Halo Tim Dukungan WhatsApp Yang Saya Hormati, Saya Adalah salah satu Pengguna aplikasi whatsapp, Saya Sedang Menjalankan Kuliah saya, dan saya berada di luar negeri, Saat saya ingin berkomunikasi dengan keluarga saya tiba tiba akun whatsapp saya terblokir dan harus mengganti nomor, saya sedang kuliah dan akun whatsapp saya terblokir, data data kuliah saya berada di akun whatsapp yang terblokir Dan sekarang saya tidak bisa menghubungi keluarga saya dikarenakan akun whatsapp saya Terkena blokir Secara permanen, Saya mohon untuk menghapus pemblokiran akun saya, karna saya sedang menjalankan kuliah saya dan data kuliah dan data data pribadi saya berada di akun whatsapp tersebut, saya mohon sekali karna uang saya sudah tidak ada lagi, saya mohon untuk menghapus pemblokiran akun whatsapp saya, saya mohon sekali, Jika Tim whatsapp ingin menghapus pemblokiran akun whatsapp saya Ini Nomor Whatsapp Saya {NUM}, Terimakasih`},
+        { tag:'PM-02', title:'Perm v2', lang:'🇬🇧 English',
+          text:`Hello, Respected WhatsApp Support Team, I am a WhatsApp application user, I am currently studying, and I am abroad, when I want to communicate with my family, suddenly my WhatsApp account is blocked and I have to change the number, I am studying. and my WhatsApp account is blocked, my college data is in a blocked WhatsApp account. And now I can't contact my family because my WhatsApp account has been permanently blocked. I ask you to remove the blocking of my account, because I'm currently carrying out my studies and college data. and my personal data is in the WhatsApp account, I really beg you because I no longer have any money, I beg you to remove the blocking of my WhatsApp account, I really beg you, if the WhatsApp team wants to remove the blocking of my WhatsApp account, this is my WhatsApp number {NUM} , Thank You`},
+        { tag:'PM-03', title:'Perm v3', lang:'🇸🇦 Arabic',
+          text:`السلام عليكم فريق دعم الواتس المحترم انا مستخدم تطبيق الواتس اب ادرس حاليا وأنا بالخارج عندما أريد التواصل مع عائلتي فجأة تم حظر حساب الواتس اب الخاص بي ويجب علي تغيير الرقم أنا أدرس . وحسابي على الواتساب محظور، وبياناتي الجامعية موجودة في حساب واتساب محظور. والآن لا أستطيع الاتصال بعائلتي لأن حسابي على WhatsApp قد تم حظره نهائيًا. أطلب منكم رفع الحظر عن حسابي، لأنني حالياً أقوم بدراستي وبياناتي الجامعية. وبياناتي الشخصية موجودة في حساب واتساب، أتوسل إليكم حقاً لأنه لم يعد لدي أي أموال، أتوسل إليكم إزالة الحظر عن حسابي على واتساب، أتوسل إليكم حقاً، إذا كان فريق واتساب يريد إزالة الحظر عن حسابي حساب WhatsApp، هذا هو رقم WhatsApp الخاص بي {NUM}، شكرًا لك`},
+        { tag:'PM-04', title:'Perm v4', lang:'🇮🇩 Indonesia',
+          text:`Halo Tim Dukungan WhatsApp Yang Saya Hormati, Saya Adalah salah satu Pengguna aplikasi whatsapp, Saya Sedang Menjalankan Kuliah saya, dan saya berada di luar negeri, Saat saya ingin berkomunikasi dengan keluarga saya tiba tiba akun whatsapp saya terblokir dan harus mengganti nomor, saya sedang kuliah dan akun whatsapp saya terblokir, data data kuliah saya berada di akun whatsapp yang terblokir Dan sekarang saya tidak bisa menghubungi keluarga saya dikarenakan akun whatsapp saya Terkena blokir Secara permanen, Saya mohon untuk menghapus pemblokiran akun saya, karna saya sedang menjalankan kuliah saya dan data kuliah dan data data pribadi saya berada ada di akun whatsapp tersebut, saya mohon sekali karna uang saya sudah tidak ada lagi, saya mohon untuk menghapus pemblokiran akun whatsapp saya, saya mohon sekali, Jika Tim whatsapp ingin menghapus pemblokiran akun whatsapp saya Ini Nomor Whatsapp Saya {NUM}, Terimakasih`},
+        { tag:'PM-05', title:'Perm v5', lang:'🇮🇩 Indonesia',
+          text:`Halo Tim WhatsApp, Saya ingin mengajukan keluhan tentang akun WhatsApp saya yang diblokir Sebagai pengguna WhatsApp saya telah mematuhi ketentuan layanan yang telah diberikan, namun ketika saya membuka aplikasi WhatsApp saya menemukan bahwa akun saya telah diblokir dengan pesan yang menyatakan bahwa "Akun ini tidak diizinkan menggunakan WhatsApp". saya meyakini bahwa saya tidak melakukan pelanggaran apapun dalam penggunaan akun WhatsApp saya. oleh karena itu saya telah mengirimkan permintaan untuk membuka blokir akun saya melalui email. namun balasan yang saya terima menyatakan bahwa. "Sistem kami menandai aktivitas akun Anda sebagai pelanggaran Ketentuan Layanan kami dan Akun Anda akan tetap diblokir sebagai akibat dari pelanggaran tersebut." saya merasa sangat kecewa dengan keputusan ini dan memohon agar tim WhatsApp dapat melakukan pemeriksaan kembali terhadap aktivitas akun saya dengan lebih teliti. Saya berharap dengan sungguh-sungguh bahwa akun saya dapat dibuka kembali sehingga saya dapat menggunakan WhatsApp dengan normal kembali. Nomor WhatsApp saya {NUM}`}
+    ]
+};
 
-            `Olá sou Ridolfo, preciso da sua ajuda, meu celular foi roubado junto com ele está meu chip com WhatsApp, não quero bagunçar minhas coisas pessoais, como coisas da minha empresa e planos, quero meu número desativado! Até que que eu consiga recuperar o Sim ou tentar recuperar meu telefone! Número: [+62{NUM}]`,
+const subjects = {
+    unban: 'Request to Unban WhatsApp Account',
+    spam: 'Unban Request - Spam Report',
+    perm: 'Unban Request - Permanent Block'
+};
 
-            `Здравствуйте, команда, ваша система по ошибке заблокировала мой номер. Я прошу вас повторно активировать мой номер, потому что у меня есть семья в другой стране, и мне нужно с ними общаться [+62{NUM}]`
-        ],
+const pantuns = [
+    "Hidup adalah seni menyeimbangkan antara menerima dan memperjuangkan.",
+    "Bahagia bukan berarti segalanya sempurna, tetapi mampu melihat indahnya ketidaksempurnaan.",
+    "Setiap hari adalah kesempatan baru untuk menulis cerita yang lebih indah.",
+    "Jangan takut gagal, karena kegagalan adalah guru terbaik dalam kehidupan.",
+    "Keberanian bukan berarti tidak takut, tetapi tetap melangkah meski dalam ketakutan.",
+    "Waktu tidak pernah menunggu siapapun, gunakan setiap detik dengan bijak.",
+    "Impian tanpa aksi hanyalah mimpi, aksi tanpa impian hanyalah rutinitas.",
+    "Yang membedakan pemenang dan pecundang adalah keberanian untuk bangkit lagi.",
+    "Hidup ini terlalu singkat untuk dihabiskan dengan menyesal.",
+    "Jadilah versi terbaik dari dirimu, bukan salinan dari orang lain."
+];
 
-        spam: [
-            `Halo WhatsApp yang saya hormati, Saya telah melakukan tindakkan ke seseorang yaitu Spam chat ke seseorang dan saya Ingin meminta maaf atas perilaku yang saya lakukan harap batalkan perblokiran ini dan pulihkan akun saya terimakasih [+62{NUM}]`,
+// ===================== STATE =====================
+let sEmail = 'smb@support.whatsapp.com';
+let sCat = '';
+let sIdx = -1;
 
-            `Halo Yang terhormat WhatsApp saya tidak bisa mendapatkan login karena terblokir karena saya sudah melakukan spam ke seseorang yang saya kenal harap pulihkan kembali dan maafkan perilaku yang saya lakukan mohon maaf Dan Hapus blokir WhatsApp saya. Dan nomor WhatsApp saya adalah: +62{NUM}`,
+// ===================== LOADING =====================
+const logs = [
+    'init::boot_sequence','load::core_engine','verify::ssl_handshake',
+    'connect::wa_api_v2','init::encryption_aes256','load::template_parser',
+    'sync::node_cluster','compile::unban_protocol','verify::endpoint_auth',
+    'init::blackhole_fx','load::particle_system','build::ui_renderer',
+    'optimize::memory_alloc','verify::integrity_check','status::all_green'
+];
 
-            `Hello Dear WhatsApp Team, My name is Impluse I've been spamming someone and my behavior really makes other people angry. Please unblock this because I've been using WhatsApp for a long time. 2022" Because I don't know the meaning of this blocking because I have already done this, please remove this blocking as soon as possible, and my WhatsApp number is +62{NUM} 01. WhatsApp, quero pedir desculpas por ter feito meu perfil no whatsApp como adulto. Por favor, remova este bloqueio imediatamente porque estou atualmente`,
+window.addEventListener('load',()=>{
+    // loading orbs
+    const orbField = document.getElementById('ldOrbs');
+    for(let i=0;i<15;i++){
+        const o = document.createElement('div');
+        o.classList.add('ld-orb');
+        o.style.left = Math.random()*100+'%';
+        o.style.width = (Math.random()*30+10)+'px';
+        o.style.height = o.style.width;
+        o.style.animationDuration = (Math.random()*8+6)+'s';
+        o.style.animationDelay = (Math.random()*5)+'s';
+        orbField.appendChild(o);
+    }
 
-            `estudando no ensino fundamental/ensino fundamental/ensino dio/escola profissionalizante/faculdade/trabalho e espero que vo entenda Quero dizer, meu nomero do WhatsApp: +62{NUM}`,
+    let p=0;
+    setTimeout(()=>{
+        const fill=document.getElementById('ldFill');
+        const pct=document.getElementById('ldPct');
+        const mod=document.getElementById('ldMod');
+        const con=document.getElementById('ldCon');
+        const iv = setInterval(()=>{
+            p+=Math.random()*2.5+.8;
+            if(p>100)p=100;
+            fill.style.width=p+'%';
+            pct.textContent=Math.floor(p)+'%';
+            const li=Math.min(Math.floor(p/(100/logs.length)),logs.length-1);
+            mod.textContent=logs[li];
+            con.innerHTML=`<em>&gt;</em> ${logs[li].replace('::',' → ')}`;
+            if(p>=100){
+                clearInterval(iv);
+                con.innerHTML='<em>&gt;</em> System ready — launching interface...';
+                setTimeout(()=>{
+                    document.getElementById('loadScreen').classList.add('bye');
+                    document.getElementById('app').classList.add('on');
+                    initApp();
+                },700);
+            }
+        },90);
+    },500);
+});
 
-            `Ole moderador do whatsApp, Por favor desbloqueie porque criei um grupo e um de meus. amigos postou no grupo a foto de um adulto menor de 18 anos, por favor restaure. porque quero Pedi ao WhatsApp para analisar esse assunto com mais ate o o mais para que eu possa acessar o WhatsApp novamente. E meumero: +62{NUM} hello WhatsApp. Immediately restore my WhatsApp because I was banned by someone I don't know and access my number to WhatsApp again and my WhatsApp number: +62{NUM}`
-        ],
+function initApp(){
+    spawnParticles();
+    buildPantun();
+    buildVariants();
+}
 
-        perm: [
-            `Halo Tim Dukungan WhatsApp Yang Saya Hormati, Saya Adalah salah satu Pengguna aplikasi whatsapp, Saya Sedang Menjalankan Kuliah saya, dan saya berada di luar negeri, Saat saya ingin berkomunikasi dengan keluarga saya tiba tiba akun whatsapp saya terblokir dan harus mengganti nomor, saya sedang kuliah dan akun whatsapp saya terblokir, data data kuliah saya berada di akun whatsapp yang terblokir Dan sekarang saya tidak bisa menghubungi keluarga saya dikarenakan akun whatsapp saya Terkena blokir Secara permanen, Saya mohon untuk menghapus pemblokiran akun saya, karna saya sedang menjalankan kuliah saya dan data kuliah dan data data pribadi saya berada di akun whatsapp tersebut, saya mohon sekali karna uang saya sudah tidak ada lagi, saya mohon untuk menghapus pemblokiran akun whatsapp saya, saya mohon sekali, Jika Tim whatsapp ingin menghapus pemblokiran akun whatsapp saya Ini Nomor Whatsapp Saya +62{NUM}, Terimakasih`,
+// ===================== PARTICLES =====================
+function spawnParticles(){
+    const c=document.getElementById('fxParticles');
+    for(let i=0;i<100;i++){
+        const p=document.createElement('div');
+        p.classList.add('fp');
+        p.style.left=Math.random()*100+'%';
+        const s=Math.random()*2.5+.5;
+        p.style.width=s+'px'; p.style.height=s+'px';
+        p.style.animationDuration=(Math.random()*25+12)+'s';
+        p.style.animationDelay=(Math.random()*20)+'s';
+        if(Math.random()>.7) p.style.background='rgba(255,255,255,0.15)';
+        c.appendChild(p);
+    }
+}
 
-            `Hello, Respected WhatsApp Support Team, I am a WhatsApp application user, I am currently studying, and I am abroad, when I want to communicate with my family, suddenly my WhatsApp account is blocked and I have to change the number, I am studying. and my WhatsApp account is blocked, my college data is in a blocked WhatsApp account. And now I can't contact my family because my WhatsApp account has been permanently blocked. I ask you to remove the blocking of my account, because I'm currently carrying out my studies and college data. and my personal data is in the WhatsApp account, I really beg you because I no longer have any money, I beg you to remove the blocking of my WhatsApp account, I really beg you, if the WhatsApp team wants to remove the blocking of my WhatsApp account, this is my WhatsApp number +62{NUM} , Thank You`,
+// ===================== PANTUN =====================
+function buildPantun(){
+    const track=document.getElementById('pantunTrack');
+    let html='';
+    for(let r=0;r<4;r++){
+        pantuns.forEach(p=>{
+            html+=`<div class="pantun-item"><em>✦</em> ${p}</div>`;
+        });
+    }
+    track.innerHTML=html;
+}
 
-            `السلام عليكم فريق دعم الواتس المحترم انا مستخدم تطبيق الواتس اب ادرس حاليا وأنا بالخارج عندما أريد التواصل مع عائلتي فجأة تم حظر حساب الواتس اب الخاص بي ويجب علي تغيير الرقم أنا أدرس . وحسابي على الواتساب محظور، وبياناتي الجامعية موجودة في حساب واتساب محظور. والآن لا أستطيع الاتصال بعائلتي لأن حسابي على WhatsApp قد تم حظره نهائيًا. أطلب منكم رفع الحظر عن حسابي، لأنني حالياً أقوم بدراستي وبياناتي الجامعية. وبياناتي الشخصية موجودة في حساب واتساب، أتوسل إليكم حقاً لأنه لم يعد لدي أي أموال، أتوسل إليكم إزالة الحظر عن حسابي على واتساب، أتوسل إليكم حقاً، إذا كان فريق واتساب يريد إزالة الحظر عن حسابي حساب WhatsApp، هذا هو رقم WhatsApp الخاص بي +62{NUM}، شكرًا لك`
-        ]
-    };
-
-    const subjects = {
-        unban: 'Request to Unban WhatsApp Account',
-        spam: 'Permohonan Unban - Spam Report',
-        perm: 'Permohonan Unban - Permanent Block'
-    };
-
-    // ==================== STATE ====================
-    let selectedEmail = 'smb@support.whatsapp.com';
-    let selectedCategory = '';
-    let selectedVariantIndex = -1;
-
-    // ==================== LOADING ====================
-    const logMessages = [
-        'init::system',
-        'load::core_modules',
-        'connect::wa_gateway',
-        'verify::ssl_cert',
-        'init::encryption_layer',
-        'load::template_engine',
-        'sync::server_nodes',
-        'compile::unban_protocols',
-        'verify::api_endpoints',
-        'status::all_systems_go'
-    ];
-
-    let progress = 0;
-
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            const fill = document.getElementById('loadFill');
-            const pct = document.getElementById('loadPercent');
-            const log = document.getElementById('loadLog');
-            const status = document.getElementById('loadStatus');
-
-            const interval = setInterval(() => {
-                progress += Math.random() * 3 + 1;
-                if (progress > 100) progress = 100;
-
-                fill.style.width = progress + '%';
-                pct.textContent = Math.floor(progress) + '%';
-
-                const logIdx = Math.min(Math.floor(progress / 10), logMessages.length - 1);
-                log.textContent = logMessages[logIdx];
-                status.innerHTML = `<span>&gt;</span> ${logMessages[logIdx].replace('::', ' → ')}`;
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    status.innerHTML = '<span>&gt;</span> System ready. Launching...';
-                    setTimeout(() => {
-                        document.getElementById('loadingScreen').classList.add('hidden');
-                        document.getElementById('mainApp').classList.add('show');
-                        spawnParticles();
-                    }, 600);
-                }
-            }, 100);
-        }, 400);
+// ===================== BUILD VARIANT CARDS =====================
+function buildVariants(){
+    ['unban','spam','perm'].forEach(cat=>{
+        const grid=document.getElementById('vg-'+cat);
+        let h='';
+        T[cat].forEach((v,i)=>{
+            h+=`<div class="vc" onclick="pickVar(this,'${cat}',${i})">
+                <div class="vchk">✓</div>
+                <div class="vtag">${v.tag}</div>
+                <div class="vtitle">${v.title}</div>
+                <div class="vlang">${v.lang}</div>
+            </div>`;
+        });
+        grid.innerHTML=h;
     });
+}
 
-    // ==================== PARTICLES ====================
-    function spawnParticles() {
-        const container = document.getElementById('floatingParticles');
-        for (let i = 0; i < 25; i++) {
-            const p = document.createElement('div');
-            p.classList.add('f-particle');
-            p.style.left = Math.random() * 100 + '%';
-            p.style.width = (Math.random() * 2 + 1) + 'px';
-            p.style.height = p.style.width;
-            p.style.animationDuration = (Math.random() * 20 + 15) + 's';
-            p.style.animationDelay = (Math.random() * 15) + 's';
-            container.appendChild(p);
-        }
+// ===================== NAVIGATION =====================
+function switchDash(id){
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
+    event.currentTarget.classList.add('on');
+    document.querySelectorAll('.dash').forEach(d=>d.classList.remove('on'));
+    document.getElementById('dash-'+id).classList.add('on');
+}
+
+// ===================== EMAIL =====================
+function pickEmail(el,email){
+    document.querySelectorAll('.em-opt').forEach(e=>e.classList.remove('on'));
+    el.classList.add('on');
+    sEmail=email;
+    document.getElementById('emailDisp').textContent=email;
+}
+
+// ===================== CATEGORY =====================
+function pickCat(cat,el){
+    sCat=cat; sIdx=-1;
+    document.querySelectorAll('.ct').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on');
+    document.querySelectorAll('.vpanel').forEach(p=>p.classList.remove('on'));
+    document.getElementById('vp-'+cat).classList.add('on');
+    document.querySelectorAll('.vc').forEach(c=>c.classList.remove('sel'));
+    document.getElementById('inpSec').classList.remove('on');
+}
+
+// ===================== VARIANT =====================
+function pickVar(el,cat,idx){
+    const panel=document.getElementById('vp-'+cat);
+    panel.querySelectorAll('.vc').forEach(c=>c.classList.remove('sel'));
+    el.classList.add('sel');
+    sIdx=idx;
+    document.getElementById('inpSec').classList.add('on');
+    setTimeout(()=>{
+        document.getElementById('inpSec').scrollIntoView({behavior:'smooth',block:'center'});
+    },200);
+}
+
+// ===================== SEND =====================
+function sendIt(){
+    const raw=document.getElementById('phoneInp').value.trim();
+    if(!sCat||sIdx<0){ shakeB(); return; }
+
+    // Clean: remove leading +62, 62, 0
+    let phone = raw.replace(/[^0-9]/g,'');
+    if(phone.startsWith('62')) phone=phone.substring(2);
+    if(phone.startsWith('0')) phone=phone.substring(1);
+    if(!phone||phone.length<8){
+        document.getElementById('phoneInp').focus();
+        document.querySelector('.ph-wrap').style.borderColor='#ff0000';
+        setTimeout(()=>document.querySelector('.ph-wrap').style.borderColor='',1500);
+        return;
     }
 
-    // ==================== EMAIL SELECT ====================
-    function selectEmail(el, email) {
-        document.querySelectorAll('.email-opt').forEach(e => e.classList.remove('active'));
-        el.classList.add('active');
-        selectedEmail = email;
-        document.getElementById('targetEmailDisplay').textContent = email;
+    const fullNum = '+62'+phone;
+    const tmpl = T[sCat][sIdx].text;
+    const body = tmpl.replace(/\{NUM\}/g, fullNum);
+    const subj = subjects[sCat];
+    const mailto = `mailto:${sEmail}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailto;
+
+    setTimeout(()=>{
+        document.getElementById('popup').classList.add('on');
+    },1200);
+}
+
+function shakeB(){
+    const b=document.querySelector('.sbtn');
+    b.style.animation='shakeB .5s ease';
+    setTimeout(()=>b.style.animation='',500);
+}
+
+function closePop(){
+    document.getElementById('popup').classList.remove('on');
+    document.getElementById('phoneInp').value='';
+    sIdx=-1;
+    document.querySelectorAll('.vc').forEach(c=>c.classList.remove('sel'));
+    document.getElementById('inpSec').classList.remove('on');
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===================== MUSIC =====================
+let playing=false;
+function toggleMusic(){
+    const audio=document.getElementById('bgMusic');
+    const btn=document.getElementById('mpBtn');
+    const bars=document.querySelectorAll('.mp-bar-v');
+    if(playing){
+        audio.pause();
+        btn.textContent='▶';
+        bars.forEach(b=>b.classList.remove('playing'));
+        playing=false;
+    } else {
+        audio.play().then(()=>{
+            btn.textContent='⏸';
+            bars.forEach(b=>b.classList.add('playing'));
+            playing=true;
+        }).catch(()=>{
+            btn.textContent='▶';
+        });
     }
+}
 
-    // ==================== CATEGORY SELECT ====================
-    function selectCategory(cat) {
-        selectedCategory = cat;
-        selectedVariantIndex = -1;
-
-        document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-
-        document.querySelectorAll('.variant-panel').forEach(p => p.classList.remove('show'));
-        const panel = document.getElementById('panel-' + cat);
-        if (panel) {
-            panel.classList.add('show');
-        }
-
-        // Reset variant selections
-        document.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
-
-        document.getElementById('inputSection').classList.remove('show');
-    }
-
-    // ==================== VARIANT SELECT ====================
-    function selectVariant(el, cat, idx) {
-        const panel = document.getElementById('panel-' + cat);
-        panel.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
-        el.classList.add('selected');
-        selectedVariantIndex = idx;
-
-        document.getElementById('inputSection').classList.add('show');
-
-        // Scroll to input
-        setTimeout(() => {
-            document.getElementById('inputSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 200);
-    }
-
-    // ==================== SEND EMAIL ====================
-    function sendEmail() {
-        const phone = document.getElementById('phoneInput').value.trim();
-
-        if (!selectedCategory) {
-            shakeBtn();
-            return;
-        }
-        if (selectedVariantIndex < 0) {
-            shakeBtn();
-            return;
-        }
-        if (!phone || phone.length < 8) {
-            document.getElementById('phoneInput').focus();
-            document.querySelector('.phone-wrap').style.borderColor = '#ff0000';
-            setTimeout(() => {
-                document.querySelector('.phone-wrap').style.borderColor = '';
-            }, 1500);
-            return;
-        }
-
-        const template = templates[selectedCategory][selectedVariantIndex];
-        const body = template.replace(/\{NUM\}/g, phone);
-        const subject = subjects[selectedCategory];
-
-        const mailto = `mailto:${selectedEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-        // Open email
-        window.location.href = mailto;
-
-        // Show popup after delay
-        setTimeout(() => {
-            document.getElementById('successPopup').classList.add('show');
-        }, 1200);
-    }
-
-    function shakeBtn() {
-        const btn = document.querySelector('.submit-btn');
-        btn.style.animation = 'none';
-        btn.offsetHeight;
-        btn.style.animation = 'shakeBtn 0.5s ease';
-    }
-
-    function closePopup() {
-        document.getElementById('successPopup').classList.remove('show');
-        // Reset form
-        document.getElementById('phoneInput').value = '';
-        selectedVariantIndex = -1;
-        document.querySelectorAll('.variant-card').forEach(c => c.classList.remove('selected'));
-        document.getElementById('inputSection').classList.remove('show');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Shake animation (injected dynamically)
-    const shakeStyle = document.createElement('style');
-    shakeStyle.textContent = `
-        @keyframes shakeBtn {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-            20%, 40%, 60%, 80% { transform: translateX(4px); }
-        }
-    `;
-    document.head.appendChild(shakeStyle);
+// Inject shake keyframe
+const sty=document.createElement('style');
+sty.textContent=`@keyframes shakeB{0%,100%{transform:translateX(0);}10%,30%,50%,70%,90%{transform:translateX(-4px);}20%,40%,60%,80%{transform:translateX(4px);}}`;
+document.head.appendChild(sty);
 </script>
 
 </body>
-                </html>
+    </html>
